@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity '0.8.0';
 
-contract Tether {
-  string public name = 'Mock_Tether_Token';
-  string public symbol = 'mUSDT';
+contract RWD { //reward token
+  string public name = 'Reward_Token';
+  string public symbol = 'RWD';
   uint256 public totalSupply = 10 ** 6 * 10 ** 18; //one million
   uint256 public decimals = 18;
 
