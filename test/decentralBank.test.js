@@ -50,7 +50,63 @@ contract('DecentralBank', ([owner, customer]) => { //deconstructed from accounts
       assert.equal(balance.toString(), TokenInWei('1000000'));
       // console.log(balance.toString());
     })
-  })
+  });
+  describe('Yield Farming', async() => {
+    it('rewards tokens for staking', async() => {
+      // check investor balance
+      let result = await tether.balanceOf(customer);
+      assert.equal(result, TokenInWei('100'), 'customer\'s mock tether initial balance');
+
+      // approving decentralBank contract
+      await tether.approve(decentralBank.address, TokenInWei('100'), {from: customer});
+      // check Staking for Customer
+      await decentralBank.depositTokens(TokenInWei('100'), {from: customer});
+      const allowance = await tether.allowance(customer, decentralBank.address);
+      // console.log(allowance.toString()); //after transfer - 0
+
+      // Check Updated balance of customer
+      result = await tether.balanceOf(customer);
+      assert.equal(result, TokenInWei('0'), 'customer balance after staking');
+
+      // Check mock tether balance of decentral bank
+      result = await tether.balanceOf(decentralBank.address);
+      assert.equal(result.toString(), TokenInWei('100'));
+
+      // Check staking balance of customer
+      result = await decentralBank.stakingBalance(customer);
+      assert.equal(result.toString(), TokenInWei('100'));
+
+      // Is Staking balance
+      result = await decentralBank.isStaking(customer);
+      assert.equal(result.toString(), 'true', 'customer staking status after staking');
+
+      // Issue Rewards
+      await decentralBank.issueRewards({ from: owner });
+
+      // reward balance of customer - 1/9th of deposit
+      result = await rwd.balanceOf(customer);
+      assert.equal(result.toString(), '11111111111111111111');
+
+      // Issue rewards must be accessible only by the owner
+      await decentralBank.issueRewards({ from: customer }).should.be.rejected;
+
+      // Unstake token
+      await decentralBank.unstakeTokens({ from: customer });
+
+      // customer tether balance after unstake
+      result = await tether.balanceOf(customer);
+      assert.equal(result.toString(), TokenInWei('100'), 'customer balance after unstaking');
+
+      // decentralBank tether balance after unstake
+      result = await tether.balanceOf(decentralBank.address);
+      assert.equal(result.toString(), TokenInWei('0'), 'decentral bank balance after unstaking');
+
+      // Is staking update
+      result = await decentralBank.isStaking(customer);
+      assert.equal(result.toString(), 'false', 'customer is no longer staking');
+    })
+  });
+
 });
 
 // >truffle test

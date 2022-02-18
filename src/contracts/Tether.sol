@@ -33,7 +33,7 @@ contract Tether {
 
   function transferFrom(address _from, address _to, uint256 _value) public returns(bool success) {
     require(balanceOf[_from] >= _value, "Insuficient Funds");
-    require(allowance[msg.sender][_from] >= _value, "Allowance exceeded");
+    require(allowance[_from][msg.sender] >= _value, "Allowance exceeded");
     balanceOf[_from] -= _value;
     balanceOf[_to] += _value;
     allowance[_from][msg.sender] -= _value;
