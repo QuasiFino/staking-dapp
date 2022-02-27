@@ -29,7 +29,7 @@ const Navbar = (props) => {
 
     return (
       <small>
-        ACCOUNT NUMBER: {blockchain.account}
+        {`Connected ${(blockchain.account).slice(0, 4)}...${(blockchain.account).slice(-4)}`}
       </small>
     );
   }

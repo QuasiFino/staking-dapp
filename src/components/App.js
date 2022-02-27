@@ -3,6 +3,8 @@ import { connect } from "react-redux";
 
 import * as actions from "../redux/data/dataActions";
 import Navbar from "./Navbar";
+import Main from "./Main";
+import Loader from "./Loader";
 
 const App = (props) => {
 
@@ -11,30 +13,56 @@ const App = (props) => {
 
   const renderError = () => {
     if(blockchain.errorMsg) {
+      window.alert(blockchain.errorMsg);
       return (
-        <div class="alert alert-danger" role="alert">
+        <div className="alert alert-danger" role="alert">
           {blockchain.errorMsg}
         </div>
       );
     }
   }
 
+  const renderContent = () => {
+    if(blockchain.loading || data.loading) {
+      return (
+        <Loader />
+      );
+    }
+    return(
+      <Main />
+    );
+    
+  }
+
   useEffect(() => {
+    let isMounted = true; //to prevent warning of unmounted async event
+
     if (
-      blockchain.account !== "" 
+      isMounted
+      && blockchain.account !== "" 
       && blockchain.tether !== null
       && blockchain.rwd !== null
       && blockchain.decentralBank !== null
     ) {
       props.fetchData(blockchain.account);
     }
-  }, [blockchain]);
+
+    return () => { isMounted = false }
+  }, [blockchain.account]);
 
   return (
     <div>
-      <Navbar account="0x0" />
-      <div className="text-center">
-        App
+      <Navbar />
+      <div className="container mt-5" style={{ maxWidth: "600px" }}>
+        <div className="row">
+          <main 
+            role="main" 
+            className='col-lg-12 ml-auto mr-auto'
+            style={{ minHeight: '100vm'}}
+          >
+            {renderContent()}
+          </main>
+        </div>
       </div>
       <br />
       {renderError()}
